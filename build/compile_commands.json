@@ -1,0 +1,74 @@
+[
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Core\\Logger.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Core\\Logger.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Core/Logger.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Core/Logger.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Core\\Initializer.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Core\\Initializer.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Core/Initializer.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Core/Initializer.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Core\\Clock.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Core\\Clock.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Core/Clock.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Core/Clock.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Core\\Utils.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Core\\Utils.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Core/Utils.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Core/Utils.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Window\\Handle.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Window\\Handle.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Window/Handle.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Window/Handle.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Window\\WindowContext.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Window\\WindowContext.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Window/WindowContext.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Window/WindowContext.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Render\\Painter.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Render\\Painter.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Render/Painter.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Render/Painter.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Audio\\Audio.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Audio\\Audio.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Audio/Audio.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Audio/Audio.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Audio\\Music.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Audio\\Music.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Audio/Music.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Audio/Music.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Game\\GameObject.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Game\\GameObject.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/GameObject.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp -std=gnu++23 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\Z-VultiplierLib.dir\\src\\Game\\Algos.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\src\\Game\\Algos.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/Algos.cpp",
+  "output": "CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj"
+},
+{
+  "directory": "F:/VSCodeWorkspace/Z-VultiplierLib/build",
+  "command": "F:\\msys64\\ucrt64\\bin\\c++.exe -DGLFW_DLL @CMakeFiles/test_app.dir/includes_CXX.rsp -std=gnu++23 -o CMakeFiles\\test_app.dir\\tests\\test.cpp.obj -c F:\\VSCodeWorkspace\\Z-VultiplierLib\\tests\\test.cpp",
+  "file": "F:/VSCodeWorkspace/Z-VultiplierLib/tests/test.cpp",
+  "output": "CMakeFiles/test_app.dir/tests/test.cpp.obj"
+}
+]

@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:/Vulkan/include",      // Vulkan 头文件
+                "${workspaceFolder}/LIBRARIES/glfw-3.5.1.bin.WIN64/include", // GLFW
+                "${workspaceFolder}/LIBRARIES/glm-master",                  // GLM
+                "${workspaceFolder}/LIBRARIES/VEFontCache",
+                "${workspaceFolder}/LIBRARIES/miniaudio-0.11.25",
+                "F:/msys64/mingw64/include/harfbuzz"
+            ],
+            "windowsSdkVersion": "10.0.22621.0",
+            "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.xx.xxxxx/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++23"
+        }
+    ],
+    "version": 4
+}
