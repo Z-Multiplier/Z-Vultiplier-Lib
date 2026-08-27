@@ -126,7 +126,7 @@ namespace Audio{
         return instance;
     }
 
-    std::deque<Sound>::iterator Engine::playSound(Sound&& sound){
+    std::list<Sound>::iterator Engine::playSound(Sound&& sound){
         std::visit([&](auto& src){
             if(!sound.sound){
                 sound.sound=SoundPtr(new ma_sound());
@@ -149,7 +149,7 @@ namespace Audio{
         return std::prev(storedSounds.end());
     }
 
-    bool Engine::stopSound(std::deque<Sound>::iterator it){
+    bool Engine::stopSound(std::list<Sound>::iterator it){
         if(it==storedSounds.end()) return false;
         if(it->sound){
             ma_sound_stop(it->sound.get());
@@ -158,7 +158,7 @@ namespace Audio{
         return true;
     }
 
-    bool Engine::isSoundPlaying(std::deque<Sound>::iterator it)const{
+    bool Engine::isSoundPlaying(std::list<Sound>::iterator it)const{
         if(it==storedSounds.end()) return false;
         if(!it->sound) return false;
         return ma_sound_is_playing(it->sound.get())!=0;

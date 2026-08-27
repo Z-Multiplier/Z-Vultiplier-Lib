@@ -35,6 +35,8 @@ set(SOURCES
     src/Audio/Music.cpp
     src/Game/GameObject.cpp
     src/Game/Algos.cpp
+    src/Game/Scene.cpp
+    src/Render/Animation.cpp
     #################################################
 )
 set(HEADERS
@@ -51,6 +53,8 @@ set(HEADERS
     include/Music.hpp
     include/GameObject.hpp
     include/Algos.hpp
+    include/Scene.hpp
+    include/Animation.hpp
     include/Z-Vultiplier.hpp
     #################################################
 )

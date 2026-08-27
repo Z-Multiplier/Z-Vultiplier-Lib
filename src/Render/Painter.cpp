@@ -1693,7 +1693,7 @@ namespace Render{
     const glm::mat4& Painter::getTransform()const{
         return thisTransform;
     }
-    void Painter::putImage(vec2 pos,vec2 size,Image& image,vec4 tint){
+    void Painter::putImage(vec2 pos,vec2 size,Image& image,vec4 tint,vec2 UVmin,vec2 UVmax){
         if(!thisframeStarted) return;
 
         if(!image.isValid()){
@@ -1724,12 +1724,12 @@ namespace Render{
         vec2 p3={pos.x,pos.y+size.y};
         vec2 p4={pos.x+size.x,pos.y+size.y};
 
-        thisvertices.push_back({p1,tint,{0.0f,1.0f}});
-        thisvertices.push_back({p2,tint,{1.0f,1.0f}});
-        thisvertices.push_back({p3,tint,{0.0f,0.0f}});
-        thisvertices.push_back({p2,tint,{1.0f,1.0f}});
-        thisvertices.push_back({p4,tint,{1.0f,0.0f}});
-        thisvertices.push_back({p3,tint,{0.0f,0.0f}});
+        thisvertices.push_back({p1,tint,{UVmin.x,UVmax.y}});
+        thisvertices.push_back({p2,tint,{UVmax.x,UVmax.y}});
+        thisvertices.push_back({p3,tint,{UVmin.x,UVmin.y}});
+        thisvertices.push_back({p2,tint,{UVmax.x,UVmax.y}});
+        thisvertices.push_back({p4,tint,{UVmax.x,UVmin.y}});
+        thisvertices.push_back({p3,tint,{UVmin.x,UVmin.y}});
 
         uint32_t count=static_cast<uint32_t>(thisvertices.size())-start;
 

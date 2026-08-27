@@ -236,6 +236,36 @@ CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.s"
 	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\VSCodeWorkspace\Z-VultiplierLib\src\Game\Algos.cpp -o CMakeFiles\Z-VultiplierLib.dir\src\Game\Algos.cpp.s
 
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/flags.make
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj: F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/Scene.cpp
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=F:\VSCodeWorkspace\Z-VultiplierLib\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj -MF CMakeFiles\Z-VultiplierLib.dir\src\Game\Scene.cpp.obj.d -o CMakeFiles\Z-VultiplierLib.dir\src\Game\Scene.cpp.obj -c F:\VSCodeWorkspace\Z-VultiplierLib\src\Game\Scene.cpp
+
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.i"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E F:\VSCodeWorkspace\Z-VultiplierLib\src\Game\Scene.cpp > CMakeFiles\Z-VultiplierLib.dir\src\Game\Scene.cpp.i
+
+CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.s"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\VSCodeWorkspace\Z-VultiplierLib\src\Game\Scene.cpp -o CMakeFiles\Z-VultiplierLib.dir\src\Game\Scene.cpp.s
+
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/flags.make
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/includes_CXX.rsp
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj: F:/VSCodeWorkspace/Z-VultiplierLib/src/Render/Animation.cpp
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj: CMakeFiles/Z-VultiplierLib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=F:\VSCodeWorkspace\Z-VultiplierLib\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj -MF CMakeFiles\Z-VultiplierLib.dir\src\Render\Animation.cpp.obj.d -o CMakeFiles\Z-VultiplierLib.dir\src\Render\Animation.cpp.obj -c F:\VSCodeWorkspace\Z-VultiplierLib\src\Render\Animation.cpp
+
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.i"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E F:\VSCodeWorkspace\Z-VultiplierLib\src\Render\Animation.cpp > CMakeFiles\Z-VultiplierLib.dir\src\Render\Animation.cpp.i
+
+CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.s"
+	F:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S F:\VSCodeWorkspace\Z-VultiplierLib\src\Render\Animation.cpp -o CMakeFiles\Z-VultiplierLib.dir\src\Render\Animation.cpp.s
+
 # Object files for target Z-VultiplierLib
 Z__VultiplierLib_OBJECTS = \
 "CMakeFiles/Z-VultiplierLib.dir/src/Core/Logger.cpp.obj" \
@@ -248,7 +278,9 @@ Z__VultiplierLib_OBJECTS = \
 "CMakeFiles/Z-VultiplierLib.dir/src/Audio/Audio.cpp.obj" \
 "CMakeFiles/Z-VultiplierLib.dir/src/Audio/Music.cpp.obj" \
 "CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.obj" \
-"CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj"
+"CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj" \
+"CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj" \
+"CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj"
 
 # External object files for target Z-VultiplierLib
 Z__VultiplierLib_EXTERNAL_OBJECTS =
@@ -264,9 +296,11 @@ libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Audio/Audio.cpp.obj
 libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Audio/Music.cpp.obj
 libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.obj
 libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj
+libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj
+libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj
 libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/build.make
 libZ-VultiplierLib.a: CMakeFiles/Z-VultiplierLib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=F:\VSCodeWorkspace\Z-VultiplierLib\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libZ-VultiplierLib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=F:\VSCodeWorkspace\Z-VultiplierLib\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libZ-VultiplierLib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\Z-VultiplierLib.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Z-VultiplierLib.dir\link.txt --verbose=$(VERBOSE)
 

@@ -16,6 +16,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Core/Utils.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Core/Utils.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Core/Utils.cpp.obj.d"
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/Algos.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Game/Algos.cpp.obj.d"
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/GameObject.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.obj.d"
+  "F:/VSCodeWorkspace/Z-VultiplierLib/src/Game/Scene.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj.d"
+  "F:/VSCodeWorkspace/Z-VultiplierLib/src/Render/Animation.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj.d"
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Render/Painter.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Render/Painter.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Render/Painter.cpp.obj.d"
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Window/Handle.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Window/Handle.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Window/Handle.cpp.obj.d"
   "F:/VSCodeWorkspace/Z-VultiplierLib/src/Window/WindowContext.cpp" "CMakeFiles/Z-VultiplierLib.dir/src/Window/WindowContext.cpp.obj" "gcc" "CMakeFiles/Z-VultiplierLib.dir/src/Window/WindowContext.cpp.obj.d"

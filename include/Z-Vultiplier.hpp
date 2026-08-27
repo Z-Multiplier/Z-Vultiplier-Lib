@@ -6,6 +6,7 @@
 
 //ATK 99 DEF 99 (?)
 #include "Algos.hpp"
+#include "Animation.hpp"
 #include "Audio.hpp"
 #include "Clock.hpp"
 #include "Color.hpp"
@@ -17,6 +18,7 @@
 #include "Music.hpp"
 #include "Painter.hpp"
 #include "RenderTypes.hpp"
+#include "Scene.hpp"
 #include "UI.hpp"
 #include "Utils.hpp"
 #include "WindowContext.hpp"

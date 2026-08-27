@@ -114,7 +114,7 @@ namespace Render{
             void drawStar(vec2 center,float outerRadius,float innerRadius,int points,vec4 color);
             void drawPie(vec2 center,float radius,float startAngle,float endAngle,vec4 color,int segments=32);
             void drawBezier(const std::vector<vec2>& controlPoints,vec4 color,int segments,float width=0.001f);
-            void putImage(vec2 pos,vec2 size,Image& img,vec4 tint={1,1,1,1});
+            void putImage(vec2 pos,vec2 size,Image& img,vec4 tint={1,1,1,1},vec2 UVmin={0,0},vec2 UVmax={1,1});
             void drawText(const Font& font,const std::string& text,vec2 pos,vec4 color={1,1,1,1},float scale=1.0f);
 
             Image& createImage(const std::string& filepath);

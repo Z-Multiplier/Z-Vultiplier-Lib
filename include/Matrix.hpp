@@ -35,6 +35,13 @@ namespace Core{
         inline glm::mat4 model(float tx,float ty,float rot,float sx,float sy){
             return translate(tx,ty)*rotate(rot)*scale(sx,sy);
         }
+
+        inline glm::mat4 shear(float shx,float shy){
+            glm::mat4 m=glm::mat4(1.0f);
+            m[0][1]=shx;
+            m[1][0]=shy;
+            return m;
+        }
     }
 }
 

@@ -333,6 +333,54 @@ src/Game/GameObject.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Game/GameObject.cpp.s
 .PHONY : src/Game/GameObject.cpp.s
 
+src/Game/Scene.obj: src/Game/Scene.cpp.obj
+.PHONY : src/Game/Scene.obj
+
+# target to build an object file
+src/Game/Scene.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.obj
+.PHONY : src/Game/Scene.cpp.obj
+
+src/Game/Scene.i: src/Game/Scene.cpp.i
+.PHONY : src/Game/Scene.i
+
+# target to preprocess a source file
+src/Game/Scene.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.i
+.PHONY : src/Game/Scene.cpp.i
+
+src/Game/Scene.s: src/Game/Scene.cpp.s
+.PHONY : src/Game/Scene.s
+
+# target to generate assembly for a file
+src/Game/Scene.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Game/Scene.cpp.s
+.PHONY : src/Game/Scene.cpp.s
+
+src/Render/Animation.obj: src/Render/Animation.cpp.obj
+.PHONY : src/Render/Animation.obj
+
+# target to build an object file
+src/Render/Animation.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.obj
+.PHONY : src/Render/Animation.cpp.obj
+
+src/Render/Animation.i: src/Render/Animation.cpp.i
+.PHONY : src/Render/Animation.i
+
+# target to preprocess a source file
+src/Render/Animation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.i
+.PHONY : src/Render/Animation.cpp.i
+
+src/Render/Animation.s: src/Render/Animation.cpp.s
+.PHONY : src/Render/Animation.s
+
+# target to generate assembly for a file
+src/Render/Animation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Z-VultiplierLib.dir\build.make CMakeFiles/Z-VultiplierLib.dir/src/Render/Animation.cpp.s
+.PHONY : src/Render/Animation.cpp.s
+
 src/Render/Painter.obj: src/Render/Painter.cpp.obj
 .PHONY : src/Render/Painter.obj
 
@@ -463,6 +511,12 @@ help:
 	@echo ... src/Game/GameObject.obj
 	@echo ... src/Game/GameObject.i
 	@echo ... src/Game/GameObject.s
+	@echo ... src/Game/Scene.obj
+	@echo ... src/Game/Scene.i
+	@echo ... src/Game/Scene.s
+	@echo ... src/Render/Animation.obj
+	@echo ... src/Render/Animation.i
+	@echo ... src/Render/Animation.s
 	@echo ... src/Render/Painter.obj
 	@echo ... src/Render/Painter.i
 	@echo ... src/Render/Painter.s

@@ -8,7 +8,7 @@
 #include <variant>
 #include <string>
 #include <chrono>
-#include <deque>
+#include <list>
 
 namespace Audio{
     enum class WaveForm{
@@ -63,9 +63,9 @@ namespace Audio{
             Engine(Engine&&)=delete;
             Engine& operator=(Engine&&)=delete;
 
-            std::deque<Sound>::iterator playSound(Sound&& sound);
-            bool stopSound(std::deque<Sound>::iterator index);
-            bool isSoundPlaying(std::deque<Sound>::iterator index)const;
+            std::list<Sound>::iterator playSound(Sound&& sound);
+            bool stopSound(std::list<Sound>::iterator index);
+            bool isSoundPlaying(std::list<Sound>::iterator index)const;
             size_t update();
 
         private:
@@ -73,7 +73,7 @@ namespace Audio{
             ~Engine();
 
             ma_engine engine;
-            std::deque<Sound> storedSounds;
+            std::list<Sound> storedSounds;
     };
 }
 

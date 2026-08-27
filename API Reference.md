@@ -53,7 +53,7 @@
 |Render|Painter|drawStar|vec2 center, float outerRadius, float innerRadius, int points, vec3/vec4/Core::Color color|N/A|Draw a star|
 |Render|Painter|drawPie|vec2 center, float radius, float startAngle, float endAngle, vec3/vec4/Core::Color color, int segments|N/A|Draw a pie|
 |Render|Painter|drawBezier|std::vector\<vec2> controlPoints, vec3/vec4/Core::Color color, int segments, float width|N/A|Draw a Bezier curve through param:controlPoints|
-|Render|Painter|putImage|vec2 pos, vec2 size, Image img, vec3/vec4/Core::Color tint|N/A|Put an image at param:pos, with tint=param:tint, tint is {1,1,1,1} in default|
+|Render|Painter|putImage|vec2 pos, vec2 size, Image img, vec3/vec4/Core::Color tint, vec2 UVmin, vec2UVmax|N/A|Put an image at param:pos, with tint=param:tint, tint is {1,1,1,1} in default, and UVmin and max is {0,0},{1,1}|
 |Render|Painter|drawText|Font font, std::string text, vec2 pos, vec3/vec4/Core::Color color, float scale|N/A|Draw text at param:pos|
 |Render|Painter|loadFont|std::string filePath, float size|Font|Load a font from file:param:filepath with size=param:size|
 |Render|Painter|measureText|Font font, std::string text, float scale|vec2|Measure the size of the text under font:param:font|
@@ -82,5 +82,13 @@
 |Utils|Timer|elapsed|N/A|double|Returns the elapsed seconds since last reset|
 |Utils|Timer|reached|double seconds|bool|Returns if the elapsed seconds has reached param:seconds|
 |Utils|N/A|intToRoman|int num|std::string|Convert an integer to roman number|
+|Game|Scene|N/A|N/A|N/A|N/A|
+|Game|SceneManager|enter|Scene s|N/A|Enter scene param:s|
+|Game|SceneManager|exit|N/A|N/A|Exit top scene|
+|Game|SceneManager|update|float delta|N/A|Update top scene according to param:delta|
+|Render|Keyframe|addProperty|property p, float val, std::function<float(float,float,float)> interp|N/A|Adds a property to the Keyframe|
+|Render|Animation|step|double len|N/A|Step the animation forward|
+|Render|Animation|addKeyframe|Keyframe kf|N/A|add a Keyframe to the animation|
+|Render|Animation|getMatrix|N/A|mat4|Get the matrix at this time|
 
 For more details, please check the source code
