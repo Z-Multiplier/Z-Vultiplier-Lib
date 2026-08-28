@@ -39,6 +39,8 @@ set(SOURCES
     src/Render/Animation.cpp
     src/Physics/Physics.cpp
     src/Render/Particle.cpp
+    src/Core/Json.cpp
+    src/Network/Network.cpp
     #################################################
 )
 set(HEADERS
@@ -59,6 +61,8 @@ set(HEADERS
     include/Animation.hpp
     include/Physics.hpp
     include/Particle.hpp
+    include/Json.hpp
+    include/Network.hpp
     include/Z-Vultiplier.hpp
     #################################################
 )
@@ -73,10 +77,25 @@ target_include_directories(Z-VultiplierLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/gli/gli>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/VEFontCache>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/enet-1.3.18/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/miniaudio-0.11.25>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/box2d-3.1.1/include/box2d>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/nlohmann_json/single_include>
     ${HARFBUZZ_INCLUDE_DIRS}
 )
+target_link_libraries(Z-VultiplierLib PUBLIC ${CMAKE_BINARY_DIR}/enet/libenet.a)
+
+if(WIN32)
+    target_link_libraries(Z-VultiplierLib PUBLIC ws2_32 winmm)
+elseif(APPLE)
+    target_link_libraries(Z-VultiplierLib PUBLIC
+        "-framework CoreFoundation"
+        "-framework CoreServices"
+    )
+elseif(UNIX AND NOT APPLE)
+    target_link_libraries(Z-VultiplierLib PUBLIC pthread rt)
+endif()
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ./lib)
 set(BOX2D_DIR "${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/box2d-3.1.1")
