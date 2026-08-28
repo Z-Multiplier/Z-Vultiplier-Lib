@@ -90,5 +90,20 @@
 |Render|Animation|step|double len|N/A|Step the animation forward|
 |Render|Animation|addKeyframe|Keyframe kf|N/A|add a Keyframe to the animation|
 |Render|Animation|getMatrix|N/A|mat4|Get the matrix at this time|
+|Physics|PhysicsWorld|PhysicsWorld|vec2 G|N/A|Set up a physics world with gravity=G|
+|Physics|PhysicsWorld|startup|N/A|N/A|Startup the world|
+|Physics|PhysicsWorld|getId|N/A|b2WorldId|Get the world id|
+|Physics|PhysicsBody|PhysicsBody|b2WorldId id, vec2 pos, std::vector<vec2> polygon, float density, float friction, bool isStatic, bool unableTriangulate|N/A|Literally|
+|Physics|PhysicsBody|getVertices|N/A|std::vector<vec2>|Get the vertices of the body|
+|Physics|PhysicsBody|getId|N/A|b2BodyId|Get the id of the body|
+|Physics|PhysicsBody|getPosition|N/A|vec2|Get the position of the body|
+|Physics|PhysicsBody|getAngle|N/A|float|Get the angle of the body|
+|Physics|PhysicsBody|applyForce|vec2 force, vec2 point|N/A| -- |
+|Physics|PhysicsBody|applyForceToCenter|vec2 force|N/A| -- |
+|Physics|PhysicsBody|applyTorque|float torque|N/A| -- |
+|Physics|PhysicsBody|applyLinearImpulse|vec2 impulse, vec2 point|N/A| -- |
+|Physics|PhysicsBody|applyLinearImpulseToCenter|vec2 impulse|N/A| -- |
+|Physics|PhysicsBody|applyAngularImpulse|float impulse|N/A| -- |
+|Physics|Joints|Please|read|the|sourcecode :D|
 
 For more details, please check the source code
