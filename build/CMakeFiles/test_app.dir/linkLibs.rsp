@@ -1,1 +1,0 @@
- "libZ-VultiplierLib.a" "D:/Vulkan/Lib/vulkan-1.lib" F:/msys64/ucrt64/lib/libglfw3.dll.a -lharfbuzz -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
