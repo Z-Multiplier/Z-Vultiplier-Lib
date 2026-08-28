@@ -37,6 +37,7 @@ set(SOURCES
     src/Game/Algos.cpp
     src/Game/Scene.cpp
     src/Render/Animation.cpp
+    src/Physics/Physics.cpp
     #################################################
 )
 set(HEADERS
@@ -55,6 +56,7 @@ set(HEADERS
     include/Algos.hpp
     include/Scene.hpp
     include/Animation.hpp
+    include/Physics.hpp
     include/Z-Vultiplier.hpp
     #################################################
 )
@@ -70,15 +72,19 @@ target_include_directories(Z-VultiplierLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/VEFontCache>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/miniaudio-0.11.25>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/box2d-3.1.1/include/box2d>
     ${HARFBUZZ_INCLUDE_DIRS}
 )
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ./lib)
+set(BOX2D_DIR "${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/box2d-3.1.1")
+set(BOX2D_LIB "${BOX2D_DIR}/build/src/libbox2d.a")
 target_link_libraries(Z-VultiplierLib PUBLIC
     Vulkan::Vulkan
     glfw
     ${GLM_TARGET}
     ${HARFBUZZ_LIBRARIES}
+    ${BOX2D_LIB}
 )
 add_executable(test_app tests/test.cpp)
 target_link_libraries(test_app PRIVATE Z-VultiplierLib)
