@@ -105,5 +105,6 @@
 |Physics|PhysicsBody|applyLinearImpulseToCenter|vec2 impulse|N/A| -- |
 |Physics|PhysicsBody|applyAngularImpulse|float impulse|N/A| -- |
 |Physics|Joints|Please|read|the|sourcecode :D|
+|Render|Particles|Same|as|above|:P|
 
 For more details, please check the source code

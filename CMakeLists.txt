@@ -38,6 +38,7 @@ set(SOURCES
     src/Game/Scene.cpp
     src/Render/Animation.cpp
     src/Physics/Physics.cpp
+    src/Render/Particle.cpp
     #################################################
 )
 set(HEADERS
@@ -57,6 +58,7 @@ set(HEADERS
     include/Scene.hpp
     include/Animation.hpp
     include/Physics.hpp
+    include/Particle.hpp
     include/Z-Vultiplier.hpp
     #################################################
 )

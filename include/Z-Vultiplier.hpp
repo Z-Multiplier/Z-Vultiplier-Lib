@@ -17,6 +17,7 @@
 #include "Matrix.hpp"
 #include "Music.hpp"
 #include "Painter.hpp"
+#include "Particle.hpp"
 #include "Physics.hpp"
 #include "RenderTypes.hpp"
 #include "Scene.hpp"
