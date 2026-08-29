@@ -1,0 +1,512 @@
+name: Coverage
+
+on:
+  push:
+    paths:
+      - "**/workflows/coverage.yml"
+      - "**/Source/**"
+      - "**/Tests/**"
+      - "**/ThirdParty/**"
+      - "**/CMakeLists.txt"
+      - "**/.gitmodules"
+      - "!**/*.md"
+      - "!**/*.txt"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  lua:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lua:
+          - { version: "5.1", suffix: "51" }
+          - { version: "5.2", suffix: "52" }
+          - { version: "5.3", suffix: "53" }
+          - { version: "5.4", suffix: "54" }
+          - { version: "5.5", suffix: "55" }
+
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov ninja-build
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+        cmake -E make_directory ${{runner.workspace}}/coverage
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+    - name: Coverage Lua ${{ matrix.lua.version }} (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        lcov -c -d "${{runner.workspace}}/build17" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/lua${{ matrix.lua.suffix }}_cxx17.info"
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+    - name: Coverage Lua ${{ matrix.lua.version }} (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        lcov -c -d "${{runner.workspace}}/build20" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/lua${{ matrix.lua.suffix }}_cxx20.info"
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+    - name: Coverage Lua ${{ matrix.lua.version }} (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        lcov -c -d "${{runner.workspace}}/build23" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/lua${{ matrix.lua.suffix }}_cxx23.info"
+
+    - name: Cache Lcov Files
+      uses: actions/cache@v5
+      with:
+        path: "${{runner.workspace}}/coverage/*.info"
+        key: lcov-lua${{ matrix.lua.suffix }}-${{runner.os}}-${{github.sha}}
+
+  luajit:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov ninja-build
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+        cmake -E make_directory ${{runner.workspace}}/coverage
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build LuaJIT (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+    - name: Coverage LuaJIT (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        lcov -c -d "${{runner.workspace}}/build17" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luajit_cxx17.info"
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build LuaJIT (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+    - name: Coverage LuaJIT (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        lcov -c -d "${{runner.workspace}}/build20" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luajit_cxx20.info"
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build LuaJIT (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+    - name: Coverage LuaJIT (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        lcov -c -d "${{runner.workspace}}/build23" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luajit_cxx23.info"
+
+    - name: Cache Lcov Files
+      uses: actions/cache@v5
+      with:
+        path: "${{runner.workspace}}/coverage/*.info"
+        key: lcov-luajit-${{runner.os}}-${{github.sha}}
+
+  luau:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov ninja-build
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+        cmake -E make_directory ${{runner.workspace}}/coverage
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Luau (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+    - name: Coverage Luau (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        lcov -c -d "${{runner.workspace}}/build17" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luau_cxx17.info"
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Luau (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+    - name: Coverage Luau (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        lcov -c -d "${{runner.workspace}}/build20" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luau_cxx20.info"
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Luau (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+    - name: Coverage Luau (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        lcov -c -d "${{runner.workspace}}/build23" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/luau_cxx23.info"
+
+    - name: Cache Lcov Files
+      uses: actions/cache@v5
+      with:
+        path: "${{runner.workspace}}/coverage/*.info"
+        key: lcov-luau-${{runner.os}}-${{github.sha}}
+
+  ravi:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov libreadline-dev ninja-build
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+        cmake -E make_directory ${{runner.workspace}}/coverage
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Ravi (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++17)
+      working-directory: ${{runner.workspace}}/build17/Tests
+      run: LD_PRELOAD=$(gcc -print-file-name=libasan.so) ./LuaBridgeTestsRavi
+
+    - name: Coverage Ravi (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        lcov -c -d "${{runner.workspace}}/build17" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/ravi_cxx17.info"
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Ravi (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++20)
+      working-directory: ${{runner.workspace}}/build20/Tests
+      run: LD_PRELOAD=$(gcc -print-file-name=libasan.so) ./LuaBridgeTestsRavi
+
+    - name: Coverage Ravi (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        lcov -c -d "${{runner.workspace}}/build20" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/ravi_cxx20.info"
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -DLUABRIDGE_COVERAGE=ON -G Ninja
+
+    - name: Build Ravi (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++23)
+      working-directory: ${{runner.workspace}}/build23/Tests
+      run: LD_PRELOAD=$(gcc -print-file-name=libasan.so) ./LuaBridgeTestsRavi
+
+    - name: Coverage Ravi (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        lcov -c -d "${{runner.workspace}}/build23" --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 \
+          --ignore-errors mismatch,unused \
+          --include "*/LuaBridge/*" --exclude "*/Tests/*" --exclude "*/Distribution/*" --exclude "*/coverage_html/*" \
+          -o "${{runner.workspace}}/coverage/ravi_cxx23.info"
+
+    - name: Cache Lcov Files
+      uses: actions/cache@v5
+      with:
+        path: "${{runner.workspace}}/coverage/*.info"
+        key: lcov-ravi-${{runner.os}}-${{github.sha}}
+
+  coveralls:
+    runs-on: ubuntu-latest
+    needs: [lua, luajit, luau, ravi]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install lcov
+        run: sudo apt-get install -y lcov
+
+      - name: Create Coverage Directory
+        run: cmake -E make_directory ${{runner.workspace}}/coverage
+
+      - name: Restore Lcov Files Lua 5.1
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-lua51-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Lua 5.2
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-lua52-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Lua 5.3
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-lua53-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Lua 5.4
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-lua54-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Lua 5.5
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-lua55-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files LuaJIT
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-luajit-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Luau
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-luau-${{runner.os}}-${{github.sha}}
+
+      - name: Restore Lcov Files Ravi
+        uses: actions/cache@v5
+        with:
+          path: "${{runner.workspace}}/coverage/*.info"
+          key: lcov-ravi-${{runner.os}}-${{github.sha}}
+
+      - name: Merge Lcov Files
+        working-directory: ${{runner.workspace}}/coverage
+        run: |
+          lcov \
+            -a "lua51_cxx17.info" \
+            -a "lua51_cxx20.info" \
+            -a "lua51_cxx23.info" \
+            -a "lua52_cxx17.info" \
+            -a "lua52_cxx20.info" \
+            -a "lua52_cxx23.info" \
+            -a "lua53_cxx17.info" \
+            -a "lua53_cxx20.info" \
+            -a "lua53_cxx23.info" \
+            -a "lua54_cxx17.info" \
+            -a "lua54_cxx20.info" \
+            -a "lua54_cxx23.info" \
+            -a "lua55_cxx17.info" \
+            -a "lua55_cxx20.info" \
+            -a "lua55_cxx23.info" \
+            -a "luajit_cxx17.info" \
+            -a "luajit_cxx20.info" \
+            -a "luajit_cxx23.info" \
+            -a "luau_cxx17.info" \
+            -a "luau_cxx20.info" \
+            -a "luau_cxx23.info" \
+            -a "ravi_cxx17.info" \
+            -a "ravi_cxx20.info" \
+            -a "ravi_cxx23.info" \
+            -o "merged.info"
+
+      - name: Install lcov2xml
+        run: cargo install lcov2xml
+
+      - name: Convert to Cobertura XML
+        working-directory: ${{runner.workspace}}/coverage
+        run: lcov2xml merged.info -o cobertura.xml
+
+      #- name: Convert to Coverage TXT
+      #  working-directory: ${{runner.workspace}}/build
+      #  run: python3 ${{runner.workspace}}/cobertura.py coverage/cobertura.info coverage/coverage.txt
+
+      - name: Upload Cobertura XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-coverage
+          path: ${{runner.workspace}}/coverage/cobertura.xml
+
+      #- name: Upload Coverage TXT
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: text-coverage
+      #    path: ${{runner.workspace}}/build/coverage/coverage.txt
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: ${{runner.workspace}}/coverage/merged.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}

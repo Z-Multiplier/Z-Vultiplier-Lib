@@ -1,0 +1,255 @@
+name: macOS
+
+on:
+  push:
+    paths:
+      - "**/workflows/build_macos.yml"
+      - "**/Source/**"
+      - "**/Tests/**"
+      - "**/ThirdParty/**"
+      - "**/CMakeLists.txt"
+      - "**/.gitmodules"
+      - "!**/*.md"
+      - "!**/*.txt"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  lua:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lua:
+          - { version: "5.1", suffix: "51" }
+          - { version: "5.2", suffix: "52" }
+          - { version: "5.3", suffix: "53" }
+          - { version: "5.4", suffix: "54" }
+          - { version: "5.5", suffix: "55" }
+
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -G Ninja
+
+    - name: Build Lua ${{ matrix.lua.version }} (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTests${{ matrix.lua.suffix }} \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaC \
+          LuaBridgeTests${{ matrix.lua.suffix }}Noexcept \
+          LuaBridgeTests${{ matrix.lua.suffix }}LuaCNoexcept
+
+    - name: Test Lua ${{ matrix.lua.version }} (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTests${{ matrix.lua.suffix }}" --output-on-failure
+
+  luajit:
+    runs-on: macos-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -G Ninja
+
+    - name: Build LuaJIT (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -G Ninja
+
+    - name: Build LuaJIT (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -G Ninja
+
+    - name: Build LuaJIT (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: |
+        cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target \
+          LuaBridgeTestsLuaJIT \
+          LuaBridgeTestsLuaJITNoexcept
+
+    - name: Test LuaJIT (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuaJIT" --output-on-failure
+
+  luau:
+    runs-on: macos-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -G Ninja
+
+    - name: Build Luau (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -G Ninja
+
+    - name: Build Luau (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -G Ninja
+
+    - name: Build Luau (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsLuau
+
+    - name: Test Luau (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsLuau" --output-on-failure
+
+  ravi:
+    runs-on: macos-latest
+    steps:
+
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+
+    - name: Create Build Environments
+      run: |
+        cmake -E make_directory ${{runner.workspace}}/build17
+        cmake -E make_directory ${{runner.workspace}}/build20
+        cmake -E make_directory ${{runner.workspace}}/build23
+
+    - name: Configure C++17
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=17 -G Ninja
+
+    - name: Build Ravi (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++17)
+      working-directory: ${{runner.workspace}}/build17
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsRavi" --output-on-failure
+
+    - name: Configure C++20
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=20 -G Ninja
+
+    - name: Build Ravi (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++20)
+      working-directory: ${{runner.workspace}}/build20
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsRavi" --output-on-failure
+
+    - name: Configure C++23
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=23 -G Ninja
+
+    - name: Build Ravi (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: cmake --build . --config $BUILD_TYPE --parallel $(nproc) --target LuaBridgeTestsRavi
+
+    - name: Test Ravi (C++23)
+      working-directory: ${{runner.workspace}}/build23
+      run: ctest --parallel $(nproc) -R "LuaBridgeTestsRavi" --output-on-failure

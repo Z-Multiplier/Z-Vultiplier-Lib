@@ -47,7 +47,7 @@ void Core::Clock::run(){
         }
     }
 
-    if(!anyOpen){
+    if(manager.getActiveWindows().empty()||(!anyOpen)){
         running=false;
         Core::globalLogger.traceLog(
             Core::logger::LOG_INFO,

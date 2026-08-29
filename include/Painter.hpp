@@ -76,28 +76,6 @@ namespace Render{
             void recordCommands(VkCommandBuffer cmdBuf,uint32_t imageIndex);
             void recreateFramebuffers();
 
-            void drawLine(vec2 p1,vec2 p2,vec3 color,float width=0.01f);
-            void drawPoint(vec2 p,vec3 color,float size=0.01f);
-            void drawTriangle(vec2 p1,vec2 p2,vec2 p3,vec3 color);
-            void drawTriangle(vec2 p1,vec2 p2,vec2 p3,vec3 c1,vec3 c2,vec3 c3);
-            void drawRect(vec2 pos,vec2 size,vec3 color);
-            void drawPolygon(const std::vector<vec2>& vertices,const vec3& color);
-            void drawCircle(vec2 center,float radius,const vec3& color,int segments=32);
-            void drawRegularPolygon(vec2 center,float radius,int sides,vec3 color){
-                drawRegularPolygon(center,radius,sides,vec4(color,1.0f));
-            }
-            void drawStar(vec2 center,float outerRadius,float innerRadius,int points,vec3 color){
-                drawStar(center,outerRadius,innerRadius,points,vec4(color,1.0f));
-            }
-            void drawPie(vec2 center,float radius,float startAngle,float endAngle,vec3 color,int segments){
-                drawPie(center,radius,startAngle,endAngle,vec4(color,1.0f),segments);
-            }
-            void drawBezier(const std::vector<vec2>& controlPoints,vec3 color,int segments,float width){
-                drawBezier(controlPoints,vec4(color,1.0f),segments,width);
-            }
-            void drawText(const Font& font,const std::string& text,vec2 pos,vec3 color,float scale=1.0f){
-                drawText(font,text,pos,vec4(color,1.0f),scale);
-            }
             Font loadFont(const std::string& filepath,float size=24.0f);
             vec2 measureText(const Font& font,const std::string& text,float scale=1.0f);
 
@@ -128,7 +106,6 @@ namespace Render{
             void setModelMatrix(const glm::mat4& matrix);
             void setViewMatrix(const glm::mat4& matrix);
             void setProjectionMatrix(const glm::mat4& matrix);
-            void setTransform(const glm::mat4& model,const glm::mat4& view,const glm::mat4& proj);
         private:
             struct GlyphInfo{
                 float u0,v0,u1,v1;

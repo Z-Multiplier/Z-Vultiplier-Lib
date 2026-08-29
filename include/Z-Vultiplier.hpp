@@ -23,6 +23,7 @@
 #include "Physics.hpp"
 #include "RenderTypes.hpp"
 #include "Scene.hpp"
+#include "Script.hpp"
 #include "UI.hpp"
 #include "Utils.hpp"
 #include "WindowContext.hpp"

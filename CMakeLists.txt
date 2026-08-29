@@ -20,8 +20,6 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
 
-
-
 set(SOURCES
     #################################################
     src/Core/Logger.cpp
@@ -40,7 +38,9 @@ set(SOURCES
     src/Physics/Physics.cpp
     src/Render/Particle.cpp
     src/Core/Json.cpp
+    src/Game/Script.cpp
     src/Network/Network.cpp
+    src/EntryPoint.cpp
     #################################################
 )
 set(HEADERS
@@ -64,6 +64,7 @@ set(HEADERS
     include/Json.hpp
     include/Network.hpp
     include/Z-Vultiplier.hpp
+    include/Script.hpp
     #################################################
 )
 add_library(Z-VultiplierLib STATIC ${SOURCES} ${HEADERS})
@@ -77,13 +78,16 @@ target_include_directories(Z-VultiplierLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/gli/gli>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/VEFontCache>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/Lua-5.4.6/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/enet-1.3.18/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/miniaudio-0.11.25>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/box2d-3.1.1/include/box2d>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/nlohmann_json/single_include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LIBRARIES/LuaBridge3-3.0-rc12/Source/LuaBridge>
     ${HARFBUZZ_INCLUDE_DIRS}
 )
 target_link_libraries(Z-VultiplierLib PUBLIC ${CMAKE_BINARY_DIR}/enet/libenet.a)
+target_link_libraries(Z-VultiplierLib PUBLIC ${CMAKE_SOURCE_DIR}/LIBRARIES/lua-5.4.6/src/liblua.a)
 
 if(WIN32)
     target_link_libraries(Z-VultiplierLib PUBLIC ws2_32 winmm)

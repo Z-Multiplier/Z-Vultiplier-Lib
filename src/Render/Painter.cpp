@@ -1487,27 +1487,6 @@ namespace Render{
         }
         drawPolygon(vertices,color);
     }
-    void Painter::drawLine(vec2 p1,vec2 p2,vec3 color,float width){
-        drawLine(p1,p2,vec4{color.x,color.y,color.z,1.0f},width);
-    }
-    void Painter::drawPoint(vec2 p,vec3 color,float size){
-        drawPoint(p,vec4{color.x,color.y,color.z,1.0f},size);
-    }
-    void Painter::drawTriangle(vec2 p1,vec2 p2,vec2 p3,vec3 color){
-        drawTriangle(p1,p2,p3,vec4{color.x,color.y,color.z,1.0f});
-    }
-    void Painter::drawTriangle(vec2 p1,vec2 p2,vec2 p3,vec3 c1,vec3 c2,vec3 c3){
-        drawTriangle(p1,p2,p3,vec4{c1.x,c1.y,c1.z,1.0f},vec4{c2.x,c2.y,c2.z,1.0f},vec4{c3.x,c3.y,c3.z,1.0f});
-    }
-    void Painter::drawRect(vec2 pos,vec2 size,vec3 color){
-        drawRect(pos,size,vec4{color.x,color.y,color.z,1.0f});
-    }
-    void Painter::drawPolygon(const std::vector<vec2>& vertices,const vec3& color){
-        drawPolygon(vertices,vec4{color.x,color.y,color.z,1.0f});
-    }
-    void Painter::drawCircle(vec2 center,float radius,const vec3& color,int segments){
-        drawCircle(center,radius,vec4{color.x,color.y,color.z,1.0f},segments);
-    }
     void Painter::createUniformBuffer(){
         VkDevice device=thiscontext->getInitializer()->getDevice();
         VkPhysicalDevice physicalDevice=thiscontext->getInitializer()->getPhysicalDevice();
@@ -1678,12 +1657,7 @@ namespace Render{
     void Painter::setProjectionMatrix(const glm::mat4& matrix){
         thisProjectionMatrix=matrix;
     }
-
-    void Painter::setTransform(const glm::mat4& model,const glm::mat4& view,const glm::mat4& proj){
-        thisModelMatrix=model;
-        thisViewMatrix=view;
-        thisProjectionMatrix=proj;
-    }
+    
     void Painter::setTransform(const glm::mat4& transform){
         thisTransform=transform;
     }
