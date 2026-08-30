@@ -40,6 +40,7 @@ namespace Game{
         std::unordered_map<std::string,std::any> attributes;
         std::vector<AIBehavior> behaviors;
         public:
+        bool alive=true;
         std::function<void(std::unordered_map<std::string,std::any>&,std::unordered_set<std::string>&)> updateFunction;
         std::unordered_set<std::string> status;
         template<typename T>
@@ -73,6 +74,33 @@ namespace Game{
                   std::unordered_set<std::string> status):attributes(std::move(attr)),behaviors(std::move(behs)),
                                                           updateFunction(std::move(updateFunc)),status(std::move(status)){};
         ~BasicLife()=default;
+    };
+    struct LifePool{
+        std::vector<std::shared_ptr<BasicLife>> pool;
+        std::vector<size_t> freeIndices;
+        LifePool(size_t reserveCnt){
+            pool.reserve(reserveCnt);
+            freeIndices.reserve(reserveCnt);
+        }
+        ~LifePool(){
+            pool.clear();
+            freeIndices.clear();
+        }
+        std::pair<std::weak_ptr<BasicLife>,size_t> spawn(BasicLife&& l){
+            if(freeIndices.empty()){
+                pool.emplace_back(std::make_shared<BasicLife>(std::move(l)));
+                return std::make_pair(pool.back(),pool.size()-1);
+            }
+            size_t index=freeIndices.back();
+            freeIndices.pop_back();
+            pool[index].reset();
+            pool[index]=std::make_shared<BasicLife>(std::move(l));
+            return std::make_pair(pool[index],index);
+        }
+        void despawn(size_t index){
+            pool[index]->alive=false;
+            freeIndices.push_back(index);
+        }
     };
 }
 

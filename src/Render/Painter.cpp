@@ -65,6 +65,408 @@ static std::vector<char> readFile(const std::string& filename){
 }
 
 namespace Render{
+    void OffscreenTarget::create(Window::WindowContext* ctx,int width,int height,VkFormat format){
+        VkDevice device=ctx->getInitializer()->getDevice();
+        extent={(uint32_t)width,(uint32_t)height};
+
+        VkImageCreateInfo imageInfo{};
+        imageInfo.sType=VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageInfo.imageType=VK_IMAGE_TYPE_2D;
+        imageInfo.format=format;
+        imageInfo.extent={(uint32_t)width,(uint32_t)height,1};
+        imageInfo.mipLevels=1;
+        imageInfo.arrayLayers=1;
+        imageInfo.samples=VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.tiling=VK_IMAGE_TILING_OPTIMAL;
+        imageInfo.usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT|VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageInfo.sharingMode=VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
+        if(vkCreateImage(device,&imageInfo,nullptr,&image)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen color image");
+
+        VkMemoryRequirements memReqs;
+        vkGetImageMemoryRequirements(device,image,&memReqs);
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType=VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize=memReqs.size;
+
+        VkPhysicalDeviceMemoryProperties memProps;
+        vkGetPhysicalDeviceMemoryProperties(ctx->getInitializer()->getPhysicalDevice(),&memProps);
+        uint32_t memType=UINT32_MAX;
+        for(uint32_t i=0;i<memProps.memoryTypeCount;i++){
+            if((memReqs.memoryTypeBits&(1<<i))&&(memProps.memoryTypes[i].propertyFlags&VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)){
+                memType=i;
+                break;
+            }
+        }
+        allocInfo.memoryTypeIndex=memType;
+        if(vkAllocateMemory(device,&allocInfo,nullptr,&memory)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to allocate offscreen color memory");
+        vkBindImageMemory(device,image,memory,0);
+
+        VkImageViewCreateInfo viewInfo{};
+        viewInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image=image;
+        viewInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format=format;
+        viewInfo.subresourceRange={VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1};
+        if(vkCreateImageView(device,&viewInfo,nullptr,&view)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen color image view");
+
+        VkImageCreateInfo depthImageInfo{};
+        depthImageInfo.sType=VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        depthImageInfo.imageType=VK_IMAGE_TYPE_2D;
+        depthImageInfo.format=VK_FORMAT_D24_UNORM_S8_UINT;
+        depthImageInfo.extent={(uint32_t)width,(uint32_t)height,1};
+        depthImageInfo.mipLevels=1;
+        depthImageInfo.arrayLayers=1;
+        depthImageInfo.samples=VK_SAMPLE_COUNT_1_BIT;
+        depthImageInfo.tiling=VK_IMAGE_TILING_OPTIMAL;
+        depthImageInfo.usage=VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        depthImageInfo.sharingMode=VK_SHARING_MODE_EXCLUSIVE;
+        depthImageInfo.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
+        if(vkCreateImage(device,&depthImageInfo,nullptr,&depthImage)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen depth image");
+
+        vkGetImageMemoryRequirements(device,depthImage,&memReqs);
+        allocInfo.allocationSize=memReqs.size;
+        memType=UINT32_MAX;
+        for(uint32_t i=0;i<memProps.memoryTypeCount;i++){
+            if((memReqs.memoryTypeBits&(1<<i))&&(memProps.memoryTypes[i].propertyFlags&VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)){
+                memType=i;
+                break;
+            }
+        }
+        allocInfo.memoryTypeIndex=memType;
+        if(vkAllocateMemory(device,&allocInfo,nullptr,&depthMemory)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to allocate offscreen depth memory");
+        vkBindImageMemory(device,depthImage,depthMemory,0);
+
+        VkImageViewCreateInfo depthViewInfo{};
+        depthViewInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        depthViewInfo.image=depthImage;
+        depthViewInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
+        depthViewInfo.format=VK_FORMAT_D24_UNORM_S8_UINT;
+        depthViewInfo.subresourceRange={VK_IMAGE_ASPECT_DEPTH_BIT|VK_IMAGE_ASPECT_STENCIL_BIT,0,1,0,1};
+        if(vkCreateImageView(device,&depthViewInfo,nullptr,&depthView)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen depth image view");
+
+        VkSamplerCreateInfo samplerInfo{};
+        samplerInfo.sType=VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter=VK_FILTER_LINEAR;
+        samplerInfo.minFilter=VK_FILTER_LINEAR;
+        samplerInfo.addressModeU=VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeV=VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeW=VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.anisotropyEnable=VK_FALSE;
+        samplerInfo.borderColor=VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates=VK_FALSE;
+        samplerInfo.compareEnable=VK_FALSE;
+        samplerInfo.compareOp=VK_COMPARE_OP_ALWAYS;
+        samplerInfo.mipmapMode=VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        if(vkCreateSampler(device,&samplerInfo,nullptr,&sampler)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen sampler");
+
+        VkFormat colorFormat=ctx->getSwapchainImageFormat();
+        VkFormat depthFormat=VK_FORMAT_D24_UNORM_S8_UINT;
+
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format=colorFormat;
+        colorAttachment.samples=VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachment.stencilLoadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkAttachmentDescription depthAttachment{};
+        depthAttachment.format=depthFormat;
+        depthAttachment.samples=VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        std::array<VkAttachmentDescription,2> attachments={colorAttachment,depthAttachment};
+
+        VkAttachmentReference colorRef{};
+        colorRef.attachment=0;
+        colorRef.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthRef{};
+        depthRef.attachment=1;
+        depthRef.layout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount=1;
+        subpass.pColorAttachments=&colorRef;
+        subpass.pDepthStencilAttachment=&depthRef;
+
+        VkSubpassDependency dep{};
+        dep.srcSubpass=VK_SUBPASS_EXTERNAL;
+        dep.dstSubpass=0;
+        dep.srcStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT|VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dep.srcAccessMask=0;
+        dep.dstStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT|VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dep.dstAccessMask=VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT|VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        VkRenderPassCreateInfo rpInfo{};
+        rpInfo.sType=VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        rpInfo.attachmentCount=static_cast<uint32_t>(attachments.size());
+        rpInfo.pAttachments=attachments.data();
+        rpInfo.subpassCount=1;
+        rpInfo.pSubpasses=&subpass;
+        rpInfo.dependencyCount=1;
+        rpInfo.pDependencies=&dep;
+
+        if(vkCreateRenderPass(device,&rpInfo,nullptr,&renderPass)!=VK_SUCCESS){
+            throw std::runtime_error("Failed to create offscreen render pass!");
+        }
+
+        VkImageView attachmentsDesc[]={view,depthView};
+        VkFramebufferCreateInfo fbInfo{};
+        fbInfo.sType=VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fbInfo.renderPass=renderPass;
+        fbInfo.attachmentCount=2;
+        fbInfo.pAttachments=attachmentsDesc;
+        fbInfo.width=width;
+        fbInfo.height=height;
+        fbInfo.layers=1;
+        if(vkCreateFramebuffer(device,&fbInfo,nullptr,&framebuffer)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create offscreen framebuffer");
+    }
+
+    void OffscreenTarget::destroy(VkDevice device){
+        vkDeviceWaitIdle(device);
+        if(framebuffer) vkDestroyFramebuffer(device,framebuffer,nullptr);
+        if(view) vkDestroyImageView(device,view,nullptr);
+        if(image) vkDestroyImage(device,image,nullptr);
+        if(memory) vkFreeMemory(device,memory,nullptr);
+        if(depthView) vkDestroyImageView(device,depthView,nullptr);
+        if(depthImage) vkDestroyImage(device,depthImage,nullptr);
+        if(depthMemory) vkFreeMemory(device,depthMemory,nullptr);
+        if(sampler) vkDestroySampler(device,sampler,nullptr);
+        if(renderPass) vkDestroyRenderPass(device,renderPass,nullptr);
+    }
+
+    PostProcessPipeline::PostProcessPipeline(Window::WindowContext* ctx,const std::string& vertPath,const std::string& fragPath)
+        :context(ctx){
+        auto device=ctx->getInitializer()->getDevice();
+
+        auto vertCode=readFile(vertPath);
+        auto fragCode=readFile(fragPath);
+        createShaderModule(vertCode,&vertModule);
+        createShaderModule(fragCode,&fragModule);
+
+        createDescriptorSetLayout();
+        createPipeline();
+
+        VkDescriptorPoolSize poolSize{};
+        poolSize.type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        poolSize.descriptorCount=1;
+        VkDescriptorPoolCreateInfo poolInfo{};
+        poolInfo.sType=VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.poolSizeCount=1;
+        poolInfo.pPoolSizes=&poolSize;
+        poolInfo.maxSets=1;
+        if(vkCreateDescriptorPool(device,&poolInfo,nullptr,&descPool)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create descriptor pool for postprocess");
+
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType=VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool=descPool;
+        allocInfo.descriptorSetCount=1;
+        allocInfo.pSetLayouts=&descLayout;
+        if(vkAllocateDescriptorSets(device,&allocInfo,&descSet)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to allocate descriptor set for postprocess");
+    }
+
+    PostProcessPipeline::~PostProcessPipeline(){
+        auto device=context->getInitializer()->getDevice();
+        if(pipeline) vkDestroyPipeline(device,pipeline,nullptr);
+        if(layout) vkDestroyPipelineLayout(device,layout,nullptr);
+        if(descLayout) vkDestroyDescriptorSetLayout(device,descLayout,nullptr);
+        if(descPool) vkDestroyDescriptorPool(device,descPool,nullptr);
+        if(vertModule) vkDestroyShaderModule(device,vertModule,nullptr);
+        if(fragModule) vkDestroyShaderModule(device,fragModule,nullptr);
+    }
+
+    void PostProcessPipeline::createShaderModule(const std::vector<char>& code,VkShaderModule* module){
+        VkShaderModuleCreateInfo info{};
+        info.sType=VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        info.codeSize=code.size();
+        info.pCode=reinterpret_cast<const uint32_t*>(code.data());
+        if(vkCreateShaderModule(context->getInitializer()->getDevice(),&info,nullptr,module)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create shader module");
+    }
+
+    void PostProcessPipeline::createDescriptorSetLayout(){
+        VkDescriptorSetLayoutBinding binding{};
+        binding.binding=0;
+        binding.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        binding.descriptorCount=1;
+        binding.stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT;
+        VkDescriptorSetLayoutCreateInfo info{};
+        info.sType=VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        info.bindingCount=1;
+        info.pBindings=&binding;
+        if(vkCreateDescriptorSetLayout(context->getInitializer()->getDevice(),&info,nullptr,&descLayout)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create postprocess descriptor set layout");
+    }
+
+    void PostProcessPipeline::createPipeline(){
+        auto device=context->getInitializer()->getDevice();
+
+        VkPipelineShaderStageCreateInfo vertStage{};
+        vertStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertStage.stage=VK_SHADER_STAGE_VERTEX_BIT;
+        vertStage.module=vertModule;
+        vertStage.pName="main";
+
+        VkPipelineShaderStageCreateInfo fragStage{};
+        fragStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragStage.stage=VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragStage.module=fragModule;
+        fragStage.pName="main";
+
+        VkPipelineShaderStageCreateInfo stages[]={vertStage,fragStage};
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+        vertexInputInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputInfo.vertexBindingDescriptionCount=0;
+        vertexInputInfo.vertexAttributeDescriptionCount=0;
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+        inputAssembly.sType=VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssembly.topology=VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+        VkViewport viewport{0,0,(float)context->getExtent().width,(float)context->getExtent().height,0,1};
+        VkRect2D scissor{{0,0},context->getExtent()};
+        VkPipelineViewportStateCreateInfo viewportState{};
+        viewportState.sType=VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportState.viewportCount=1;
+        viewportState.pViewports=&viewport;
+        viewportState.scissorCount=1;
+        viewportState.pScissors=&scissor;
+
+        VkPipelineRasterizationStateCreateInfo rasterizer{};
+        rasterizer.sType=VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        rasterizer.polygonMode=VK_POLYGON_MODE_FILL;
+        rasterizer.cullMode=VK_CULL_MODE_NONE;
+        rasterizer.frontFace=VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizer.lineWidth=1.0f;
+
+        VkPipelineMultisampleStateCreateInfo multisampling{};
+        multisampling.sType=VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.sampleShadingEnable=VK_FALSE;
+        multisampling.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
+
+        VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+        colorBlendAttachment.colorWriteMask=VK_COLOR_COMPONENT_R_BIT|VK_COLOR_COMPONENT_G_BIT|VK_COLOR_COMPONENT_B_BIT|VK_COLOR_COMPONENT_A_BIT;
+        colorBlendAttachment.blendEnable=VK_FALSE;
+
+        VkPipelineColorBlendStateCreateInfo colorBlending{};
+        colorBlending.sType=VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        colorBlending.attachmentCount=1;
+        colorBlending.pAttachments=&colorBlendAttachment;
+
+        VkPushConstantRange pushRange{};
+        pushRange.stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushRange.offset=0;
+        pushRange.size=sizeof(glm::vec4);
+
+        VkPipelineLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        layoutInfo.setLayoutCount=1;
+        layoutInfo.pSetLayouts=&descLayout;
+        layoutInfo.pushConstantRangeCount=1;
+        layoutInfo.pPushConstantRanges=&pushRange;
+        if(vkCreatePipelineLayout(device,&layoutInfo,nullptr,&layout)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create postprocess pipeline layout");
+
+        VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+        depthStencilState.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencilState.depthTestEnable=VK_FALSE;
+        depthStencilState.depthWriteEnable=VK_FALSE;
+        depthStencilState.depthCompareOp=VK_COMPARE_OP_ALWAYS;
+        depthStencilState.depthBoundsTestEnable=VK_FALSE;
+        depthStencilState.stencilTestEnable=VK_FALSE;
+
+        VkGraphicsPipelineCreateInfo pipelineInfo{};
+        pipelineInfo.sType=VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipelineInfo.stageCount=2;
+        pipelineInfo.pStages=stages;
+        pipelineInfo.pVertexInputState=&vertexInputInfo;
+        pipelineInfo.pInputAssemblyState=&inputAssembly;
+        pipelineInfo.pViewportState=&viewportState;
+        pipelineInfo.pRasterizationState=&rasterizer;
+        pipelineInfo.pMultisampleState=&multisampling;
+        pipelineInfo.pColorBlendState=&colorBlending;
+        pipelineInfo.layout=layout;
+        pipelineInfo.renderPass=context->getPainter()->getRenderPass();
+        pipelineInfo.subpass=0;
+        pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
+        pipelineInfo.pDepthStencilState=&depthStencilState;
+
+        if(vkCreateGraphicsPipelines(device,VK_NULL_HANDLE,1,&pipelineInfo,nullptr,&pipeline)!=VK_SUCCESS)
+            throw std::runtime_error("Failed to create postprocess pipeline");
+    }
+
+    void PostProcessPipeline::apply(VkCommandBuffer cmdBuf,VkImageView inputView,VkSampler inputSampler,VkExtent2D targetExtent){
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.sampler=inputSampler;
+        imageInfo.imageView=inputView;
+        imageInfo.imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkWriteDescriptorSet write{};
+        write.sType=VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.dstSet=descSet;
+        write.dstBinding=0;
+        write.descriptorCount=1;
+        write.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write.pImageInfo=&imageInfo;
+        vkUpdateDescriptorSets(context->getInitializer()->getDevice(),1,&write,0,nullptr);
+
+        vkCmdBindPipeline(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline);
+        vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,0,1,&descSet,0,nullptr);
+
+        vkCmdDraw(cmdBuf,3,1,0,0);
+    }
+
+    void Painter::enablePostProcess(const std::string& vertPath,const std::string& fragPath){
+        thisEnablePostProcess=true;
+        VkDevice device=thiscontext->getInitializer()->getDevice();
+
+        if(!offscreenTarget){
+            offscreenTarget=std::make_unique<OffscreenTarget>();
+            swapchainFormat=thiscontext->getSwapchainImageFormat();
+            swapchainExtent=thiscontext->getExtent();
+            offscreenTarget->create(thiscontext,
+                                    swapchainExtent.width,
+                                    swapchainExtent.height,
+                                    swapchainFormat);
+        }
+
+        if(!postProcessPipeline){
+            postProcessPipeline=std::make_unique<PostProcessPipeline>(thiscontext,vertPath,fragPath);
+        }
+    }
+    void Painter::unablePostProcess(){
+        thisEnablePostProcess=false;
+        VkDevice device=thiscontext->getInitializer()->getDevice();
+        vkDeviceWaitIdle(device);
+        if(offscreenTarget){
+            offscreenTarget->destroy(thiscontext->getInitializer()->getDevice());
+            offscreenTarget.reset();
+        }
+        postProcessPipeline.reset();
+        return;
+    }
+
     Painter::Image::Image(const std::string& filepath,Painter* painter){
         this->painter=painter;
         loadFromFile(filepath);
@@ -953,6 +1355,15 @@ namespace Render{
         }
         stencilImageMemories.clear();
 
+        if(postProcessPipeline){
+            postProcessPipeline.reset(); 
+        }
+        if(offscreenTarget){
+            offscreenTarget->destroy(device);
+            offscreenTarget.reset();
+        }
+        postProcessPipeline.reset();
+
         if(thisrenderPass!=VK_NULL_HANDLE){
             vkDestroyRenderPass(device,thisrenderPass,nullptr);
             thisrenderPass=VK_NULL_HANDLE;
@@ -1413,6 +1824,16 @@ namespace Render{
         createStencilImages();
 
         createFramebuffers();
+
+        if(thisEnablePostProcess&&offscreenTarget){
+            VkDevice device=thiscontext->getInitializer()->getDevice();
+            offscreenTarget->destroy(device);
+            swapchainExtent=thiscontext->getExtent();
+            offscreenTarget->create(thiscontext,
+                                    swapchainExtent.width,
+                                    swapchainExtent.height,
+                                    swapchainFormat);
+        }
     }
 
     void Painter::createGraphicsPipeline(){
@@ -1762,7 +2183,6 @@ namespace Render{
     }
 
     void Painter::recordCommands(VkCommandBuffer cmdBuf,uint32_t imageIndex){
-        uploadAtlasToGPU();
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType=VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags=VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -1770,76 +2190,134 @@ namespace Render{
             throw std::runtime_error("Failed to begin recording command buffer!");
         }
 
-        VkClearValue clearValues[2]{};
-        clearValues[0].color={{1.0f,1.0f,1.0f,1.0f}};
-        clearValues[1].depthStencil={1.0f,0};
-
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType=VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass=thisrenderPass;
-        renderPassInfo.framebuffer=thisframebuffers[imageIndex];
-        renderPassInfo.renderArea.offset={0,0};
-        renderPassInfo.renderArea.extent=thiscontext->getExtent();
-        renderPassInfo.clearValueCount=2;
-        renderPassInfo.pClearValues=clearValues;
-
+        uploadAtlasToGPU();
         updateVertexBuffer();
 
-        vkCmdBeginRenderPass(cmdBuf,&renderPassInfo,VK_SUBPASS_CONTENTS_INLINE);
+        VkFramebuffer finalFb=thisframebuffers[imageIndex];
+        VkExtent2D finalExt=thiscontext->getExtent();
 
-        VkViewport viewport{};
-        viewport.x=0.0f;
-        viewport.y=0.0f;
-        viewport.width=(float)thiscontext->getExtent().width;
-        viewport.height=(float)thiscontext->getExtent().height;
-        viewport.minDepth=0.0f;
-        viewport.maxDepth=1.0f;
-        vkCmdSetViewport(cmdBuf,0,1,&viewport);
+        VkClearValue clearValues[2]={};
+        clearValues[0].color={{0.0f,0.0f,0.0f,1.0f}};
+        clearValues[1].depthStencil={1.0f,0};
 
-        VkRect2D scissor{};
-        scissor.offset={0,0};
-        scissor.extent=thiscontext->getExtent();
-        vkCmdSetScissor(cmdBuf,0,1,&scissor);
+        if(thisEnablePostProcess&&offscreenTarget&&postProcessPipeline){
+            VkRenderPassBeginInfo offscreenPassInfo{};
+            offscreenPassInfo.sType=VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            offscreenPassInfo.renderPass=offscreenTarget->renderPass;
+            offscreenPassInfo.framebuffer=offscreenTarget->framebuffer;
+            offscreenPassInfo.renderArea={{0,0},offscreenTarget->extent};
+            offscreenPassInfo.clearValueCount=2;
+            offscreenPassInfo.pClearValues=clearValues;
 
-        struct ViewProj {
-            glm::mat4 view;
-            glm::mat4 proj;
-        }vp;
-        vp.view=thisViewMatrix;
-        vp.proj=thisProjectionMatrix;
-        memcpy(thisUniformMappedData,&vp,sizeof(vp));
+            vkCmdBeginRenderPass(cmdBuf,&offscreenPassInfo,VK_SUBPASS_CONTENTS_INLINE);
 
-        VkPipelineLayout layout=thistransparentPipelineLayout;
+            VkViewport viewport{0,0,(float)offscreenTarget->extent.width,(float)offscreenTarget->extent.height,0,1};
+            vkCmdSetViewport(cmdBuf,0,1,&viewport);
+            VkRect2D scissor{{0,0},offscreenTarget->extent};
+            vkCmdSetScissor(cmdBuf,0,1,&scissor);
 
-        vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                layout,0,1,
-                                &thisDescriptorSet,0,nullptr);
+            struct ViewProj{
+                glm::mat4 view;
+                glm::mat4 proj;
+            }vp;
+            vp.view=thisViewMatrix;
+            vp.proj=thisProjectionMatrix;
+            memcpy(thisUniformMappedData,&vp,sizeof(vp));
 
-        VkDeviceSize offsets[]={0};
-        vkCmdBindVertexBuffers(cmdBuf,0,1,&thisvertexBuffer,offsets);
+            VkPipelineLayout layout=thistransparentPipelineLayout;
+            vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,0,1,
+                                    &thisDescriptorSet,0,nullptr);
 
-        for(const auto& drawCmd:thisDrawCommands){
-            VkDescriptorSet descSet=drawCmd.descriptorSet;
-            if(descSet==VK_NULL_HANDLE){
-                descSet=defaultDescriptorSet;
+            VkDeviceSize offsets[]={0};
+            vkCmdBindVertexBuffers(cmdBuf,0,1,&thisvertexBuffer,offsets);
+
+            for(const auto& drawCmd:thisDrawCommands){
+                VkDescriptorSet descSet=drawCmd.descriptorSet;
+                if(descSet==VK_NULL_HANDLE) descSet=defaultDescriptorSet;
+                vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,1,1,&descSet,0,nullptr);
+
+                VkPipeline pipeline=drawCmd.isTransparent?thistransparentPipeline:thisopaquePipeline;
+                vkCmdBindPipeline(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline);
+
+                vkCmdPushConstants(cmdBuf,layout,
+                                    VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,
+                                    0,sizeof(glm::mat4),&drawCmd.transform);
+
+                vkCmdDraw(cmdBuf,drawCmd.vertexCount,1,drawCmd.firstVertex,0);
             }
-            vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,1,1,&descSet,0,nullptr);
 
-            VkPipeline pipeline=drawCmd.isTransparent?thistransparentPipeline:thisopaquePipeline;
-            vkCmdBindPipeline(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline);
+            vkCmdEndRenderPass(cmdBuf);
 
-            TextPush push{};
-            push.transform=drawCmd.transform;
-            push.color=glm::vec4(1.0f);
-            push.downsample=0;
-            vkCmdPushConstants(cmdBuf,layout,
-                                VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,
-                                0,sizeof(glm::mat4),&drawCmd.transform);
+            VkRenderPassBeginInfo screenPassInfo{};
+            screenPassInfo.sType=VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            screenPassInfo.renderPass=thisrenderPass;
+            screenPassInfo.framebuffer=finalFb;
+            screenPassInfo.renderArea={{0,0},finalExt};
+            screenPassInfo.clearValueCount=2;
+            screenPassInfo.pClearValues=clearValues;
 
-            vkCmdDraw(cmdBuf,drawCmd.vertexCount,1,drawCmd.firstVertex,0);
+            vkCmdBeginRenderPass(cmdBuf,&screenPassInfo,VK_SUBPASS_CONTENTS_INLINE);
+
+            VkViewport screenViewport{0,0,(float)finalExt.width,(float)finalExt.height,0,1};
+            vkCmdSetViewport(cmdBuf,0,1,&screenViewport);
+            VkRect2D screenScissor{{0,0},finalExt};
+            vkCmdSetScissor(cmdBuf,0,1,&screenScissor);
+
+            postProcessPipeline->apply(cmdBuf,
+                                    offscreenTarget->view,
+                                    offscreenTarget->sampler,
+                                    finalExt);
+
+            vkCmdEndRenderPass(cmdBuf);
         }
+        else{
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType=VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass=thisrenderPass;
+            renderPassInfo.framebuffer=finalFb;
+            renderPassInfo.renderArea={{0,0},finalExt};
+            renderPassInfo.clearValueCount=2;
+            renderPassInfo.pClearValues=clearValues;
 
-        vkCmdEndRenderPass(cmdBuf);
+            vkCmdBeginRenderPass(cmdBuf,&renderPassInfo,VK_SUBPASS_CONTENTS_INLINE);
+
+            VkViewport viewport{0,0,(float)finalExt.width,(float)finalExt.height,0,1};
+            vkCmdSetViewport(cmdBuf,0,1,&viewport);
+            VkRect2D scissor{{0,0},finalExt};
+            vkCmdSetScissor(cmdBuf,0,1,&scissor);
+
+            struct ViewProj{
+                glm::mat4 view;
+                glm::mat4 proj;
+            }vp;
+            vp.view=thisViewMatrix;
+            vp.proj=thisProjectionMatrix;
+            memcpy(thisUniformMappedData,&vp,sizeof(vp));
+
+            VkPipelineLayout layout=thistransparentPipelineLayout;
+            vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,0,1,
+                                    &thisDescriptorSet,0,nullptr);
+
+            VkDeviceSize offsets[]={0};
+            vkCmdBindVertexBuffers(cmdBuf,0,1,&thisvertexBuffer,offsets);
+
+            for(const auto& drawCmd:thisDrawCommands){
+                VkDescriptorSet descSet=drawCmd.descriptorSet;
+                if(descSet==VK_NULL_HANDLE) descSet=defaultDescriptorSet;
+                vkCmdBindDescriptorSets(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,1,1,&descSet,0,nullptr);
+
+                VkPipeline pipeline=drawCmd.isTransparent?thistransparentPipeline:thisopaquePipeline;
+                vkCmdBindPipeline(cmdBuf,VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline);
+
+                vkCmdPushConstants(cmdBuf,layout,
+                                    VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,
+                                    0,sizeof(glm::mat4),&drawCmd.transform);
+
+                vkCmdDraw(cmdBuf,drawCmd.vertexCount,1,drawCmd.firstVertex,0);
+            }
+
+            vkCmdEndRenderPass(cmdBuf);
+        }
 
         if(vkEndCommandBuffer(cmdBuf)!=VK_SUCCESS){
             throw std::runtime_error("Failed to end command buffer!");

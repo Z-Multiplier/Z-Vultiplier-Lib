@@ -10,6 +10,7 @@ void luaPrint(const std::string& str){
     );
 }
 void UserLuaContact(){
+    freopen("console.log","w",stderr);
     Game::ScriptEngine::instance().registerFunction("luaPrint",luaPrint);
 }
 void UserInit(){

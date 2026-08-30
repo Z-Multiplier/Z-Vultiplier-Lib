@@ -172,6 +172,8 @@ namespace Game{
             .addFunction("setTransform",Render::Painter::setTransform)
             .addFunction("setProjectionMatrix",Render::Painter::setProjectionMatrix)
             .addFunction("setViewMatrix",Render::Painter::setViewMatrix)
+            .addFunction("enablePostProcess",Render::Painter::enablePostProcess)
+            .addFunction("unablePostProcess",Render::Painter::unablePostProcess)
         .endClass()
         .beginClass<Render::Painter::Image>("Image")
             .addFunction("getWidth",Render::Painter::Image::getWidth)

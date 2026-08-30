@@ -16,6 +16,41 @@ namespace Render{
     using vec2=glm::vec2;
     using vec3=glm::vec3;
     using vec4=glm::vec4;
+    struct OffscreenTarget{
+        VkImage image=VK_NULL_HANDLE;
+        VkDeviceMemory memory=VK_NULL_HANDLE;
+        VkImageView view=VK_NULL_HANDLE;
+        VkFramebuffer framebuffer=VK_NULL_HANDLE;
+        VkExtent2D extent;
+        VkSampler sampler=VK_NULL_HANDLE;
+        VkImage depthImage=VK_NULL_HANDLE;
+        VkDeviceMemory depthMemory=VK_NULL_HANDLE;
+        VkImageView depthView=VK_NULL_HANDLE;
+        VkRenderPass renderPass=VK_NULL_HANDLE;
+        void create(Window::WindowContext* ctx,int width,int height,VkFormat format);
+        void destroy(VkDevice device);
+    };
+
+    class PostProcessPipeline{
+        public:
+            PostProcessPipeline(Window::WindowContext* ctx,const std::string& vertPath,const std::string& fragPath);
+            ~PostProcessPipeline();
+            void apply(VkCommandBuffer cmdBuf,VkImageView inputView,VkSampler inputSampler,VkExtent2D targetExtent);
+
+        private:
+            Window::WindowContext* context;
+            VkPipeline pipeline=VK_NULL_HANDLE;
+            VkPipelineLayout layout=VK_NULL_HANDLE;
+            VkDescriptorSetLayout descLayout=VK_NULL_HANDLE;
+            VkDescriptorPool descPool=VK_NULL_HANDLE;
+            VkDescriptorSet descSet=VK_NULL_HANDLE;
+
+            VkShaderModule vertModule,fragModule;
+
+            void createShaderModule(const std::vector<char>& code,VkShaderModule* module);
+            void createDescriptorSetLayout();
+            void createPipeline();
+    };
     struct Painter{
         public:
             struct Font{
@@ -106,6 +141,18 @@ namespace Render{
             void setModelMatrix(const glm::mat4& matrix);
             void setViewMatrix(const glm::mat4& matrix);
             void setProjectionMatrix(const glm::mat4& matrix);
+
+            VkRenderPass getRenderPass()const{return thisrenderPass;}
+
+            void setRenderTarget(VkFramebuffer fb,VkExtent2D extent){
+                currentFramebuffer=fb;
+                currentExtent=extent;
+            }
+
+            void enablePostProcess(const std::string& vertPath,
+                                   const std::string& fragPath);
+            void unablePostProcess();
+
         private:
             struct GlyphInfo{
                 float u0,v0,u1,v1;
@@ -192,6 +239,9 @@ namespace Render{
                     return true;
                 }
             };
+
+            VkFramebuffer currentFramebuffer=VK_NULL_HANDLE;
+            VkExtent2D currentExtent={0,0};
 
             std::vector<FontData> fonts;
             Atlas textAtlas;
@@ -282,6 +332,12 @@ namespace Render{
 
             void createUniformBuffer();
             void createDescriptorSetLayout();
+
+            std::unique_ptr<OffscreenTarget> offscreenTarget;
+            std::unique_ptr<PostProcessPipeline> postProcessPipeline;
+            bool thisEnablePostProcess=false;
+            VkFormat swapchainFormat;
+            VkExtent2D swapchainExtent;
     };
 }
 
